@@ -9,15 +9,10 @@ local function import_to(src, dest)
 end
 
 
-local printt = tablex.printt
-tablex.printt = nil
-
-
+-- 导入到 table 库，但不覆盖原有函数
 import_to(tablex, table)
 
-
-_ENV.printt = printt
-tablex.printt = printt
+printt = tablex.printt
 
 
 return tablex
