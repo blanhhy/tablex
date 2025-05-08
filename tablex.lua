@@ -78,7 +78,7 @@ end
 
 -- 列出对象的所有字段
 local function dir(tb)
-  tb = (type(tb) == "table" and tb or getmt(tb)
+  tb = nil ~= tb and (type(tb) == "table" and tb or getmt(tb)
   or error(f(
     "The object (%s) has no accessible namespace.",
     str(tb)
