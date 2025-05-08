@@ -23,9 +23,13 @@ printt(...)
 tablex.print(tb [, max_depth])
 table.print(tb [, max_depth])
 
+-- 列出对象所有字段
+local list = tablex.dir(obj)
+local list = dir(obj)
+
 -- 获取table元素数量
-local size = tablex.len(tb)
-local size = table.len(tb)
+local size = tablex.size(tb)
+local size = table.size(tb)
 
 -- 获取最大正整数键
 local n = tablex.maxn(tb)

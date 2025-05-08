@@ -2,17 +2,17 @@ local require = require
 local _G = require "_G"
 local string = require "string"
 local table = require "table"
-local print = print
-local next = next
+local print = _G.print
+local next = _G.next
 local rep = string.rep
 local f = string.format
 local join = table.concat
 local pack = table.pack
 local unpack = table.unpack
-local str = tostring
+local str = _G.tostring
 local int = require("math").floor
-local setmt = setmetatable
-local getmt = getmetatable
+local setmt = _G.setmetatable
+local getmt = _G.getmetatable
 
 -- require "unifuncex"
 local type = rawtype or type
@@ -67,11 +67,30 @@ end
 
 -- 打印完整表格（支持指定深度）
 local function table_print(tb, max_depth)
-  if max_depth then
-    print(tb_to_str(tb, max_depth))
-   else
+  if nil == max_depth and nil ~= tb[1] then
     print(arr_to_str(tb))
+   else
+    print(tb_to_str(tb, max_depth))
   end
+end
+
+
+
+-- 列出对象的所有字段
+local function dir(tb)
+  tb = (type(tb) == "table" and tb or getmt(tb)
+  or error(f(
+    "The object (%s) has no accessible namespace.",
+    str(tb)
+  ), 2)) or _ENV or getfenv()
+  local list = {}
+  local i = 0
+  for k in next, tb do
+    i = i + 1
+    list[i] = k
+  end
+  list.n = i
+  return list
 end
 
 
@@ -168,7 +187,8 @@ return {
   dump = tb_to_str,
   print = table_print,
   printt = print_table,
-  len = get_len,
+  dir = dir,
+  size = get_len,
   maxn = maxn,
   override = override,
   collect = collect,
