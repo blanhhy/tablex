@@ -1,46 +1,25 @@
-local require = require
+local _M = require "tablex.tablex"
+local packagex = package.loaded.packagex
 
-local _ENV = require "tablex.tablex"
-local _G = require "_G"
-local table = require "table"
-local next = _G.next
+if packagex and packagex.inited then
+  tablex = _M
+  __exports = _M.__exports
 
-local function import_to(src, dest, rule)
-  if rule then
-    local n = #rule
-    if n ~= 0 then
-      for i = 1, n do
-        local k = rule[i]
-        if nil == dest[k] then
-          dest[k] = src[k]
-        end
-      end
-     else
-      for k, v in next, src do
-        if nil == dest[k] and not rule[k] then
-          dest[k] = v
-        end
+  else
+    local env = _M.__exports[1][1] or _G
+    for k, v in next, _M.__exports[1] do
+      if k ~= 1 then
+        _G[k] = _G[k] or v
       end
     end
-   else
-    for k, v in next, src do
-      if nil == dest[k] then
-        dest[k] = v
+    
+    env = _M.__exports[2][1] or table
+    for k, v in next, _M.__exports[2] do
+      if k~= 1 
+        and not _M.__exports[1][k] then
+        table[k] = table[k] or v
       end
     end
-  end
 end
 
--- 导入到 table 库，但不覆盖原有函数
-import_to(_ENV, table, {
-  printt = true, dir = true
-})
-
--- 导入到 _G
-import_to(_ENV, _G, {
-  "printt", "dir"
-})
-
-_import_to = import_to
-
-return _ENV
+return _M

@@ -2,6 +2,36 @@
 
 **Tablex** 是一个 Lua 模块，为 `table` 库补充了一些常用函数。
 
+## 导入方式
+
+推荐使用 [packagex](https://github.com/blanhhy/packagex) 模块进行导入：
+
+```lua
+require "packagex".init()
+
+include "tablex"
+```
+
+也可以用普通的方式：
+
+```lua
+require "tablex"
+```
+
+如果你不希望模块修改全局环境和 `table` 库，可以这样导入：
+
+```lua
+require "packagex".init()
+
+local tablex = requirex "tablex"
+```
+
+或者普通的方式：
+
+```lua
+local tablex = require "tablex.tablex"
+```
+
 ## 函数一览
 
 `[]` 表示可选参数，` = ?` 表示默认值
