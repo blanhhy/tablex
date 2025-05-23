@@ -26,7 +26,7 @@ require "packagex".init()
 local tablex = requirex "tablex"
 ```
 
-或者普通的方式：
+或者单文件导入（普通方式）：
 
 ```lua
 local tablex = require "tablex.tablex"
