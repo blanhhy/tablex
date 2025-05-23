@@ -1,4 +1,3 @@
-local require = require
 local _G = _G
 
 local print = _G.print
@@ -61,7 +60,7 @@ if unpack then
   function print_table(...)
     local params = pack(...)
     for i = 1, params.n do
-      params[i] = tb_to_str(params[i], 1)
+      params[i] = tb_to_str(params[i], 2)
     end
     print(unpack(params, 1, params.n))
   end
