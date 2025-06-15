@@ -4,6 +4,8 @@
 
 ## 导入方式
 
+### 侵入式导入
+
 推荐使用 [packagex](https://github.com/blanhhy/packagex) 模块进行导入：
 
 ```lua
@@ -18,7 +20,9 @@ include "tablex"
 require "tablex"
 ```
 
-如果你不希望模块修改全局环境和 `table` 库，可以这样导入：
+### 非侵入式导入
+
+如果你不希望模块修改全局环境和 `table` 标准库，可以这样导入：
 
 ```lua
 require "packagex".init()
