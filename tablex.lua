@@ -19,11 +19,11 @@ local type = _G.type
 
 -- 列出完整表格
 local function tb_to_str(tb, max_depth, indent)
+  indent = indent or 0
   local t = type(tb)
   if t ~= "table" then
-    return (t == "string" and "[[%s]]" or "%s"):format(tb)
+    return (t == "string" and indent > 0 and "[[%s]]" or "%s"):format(tb)
   end
-  indent = indent or 0
   max_depth = max_depth or 10 -- 默认最大递归深度 10
   if indent >= max_depth then
     return "..." -- 超过最大深度时省略，防止栈溢出
