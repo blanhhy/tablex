@@ -46,8 +46,8 @@ local str = tablex.tostring(tb [, sep, [_start, _end]])
 local str = table.tostring(tb [, sep, [_start, _end]])
 
 -- table转字符串
-local str = tablex.dump(tb [, max_depth = 10])
-local str = table.dump(tb [, max_depth = 10])
+local str = tablex.dump(tb [, max_depth = 1])
+local str = table.dump(tb [, max_depth = 1])
 
 -- 打印完整表格（多参数，类似print）
 tablex.printt(...)

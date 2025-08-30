@@ -14,28 +14,29 @@ local int = _G.math.floor
 local setmt = _G.setmetatable
 local getmt = _G.getmetatable
 
-local type = _G.rawtype or _G.type
+local type = _G.type
 
 
 -- 列出完整表格
 local function tb_to_str(tb, max_depth, indent)
-  if type(tb) ~= "table" then
-    return str(tb)
+  local t = type(tb)
+  if t ~= "table" then
+    return (t == "string" and "[[%s]]" or "%s"):format(tb)
   end
   indent = indent or 0
   max_depth = max_depth or 10 -- 默认最大递归深度 10
   if indent >= max_depth then
-    return str(tb) -- 超过最大深度时省略，防止栈溢出
+    return "..." -- 超过最大深度时省略，防止栈溢出
   end
   local str_list = {}
-  local prefix = ("  "):rep(indent)
+  local prefix = ("  "):rep(indent+1)
   for key, value in next, tb do
-    local key_str = type(key) == "string" and ("[\"%s\"]"):format(key) or ("[%s]"):format(str(key))
-    local value_str = value ~= _G and (value ~= tb and tb_to_str(value, max_depth, indent + 1) or "__self") or "_G" -- 排除_G与自引用，防止栈溢出
+    local key_str = (type(key) == "string" and "[\"%s\"]" or "[%s]"):format(key)
+    local value_str = value ~= _G and (value ~= tb and tb_to_str(value, max_depth, indent + 1) or "$self") or "_G" -- 排除_G与自引用，防止栈溢出
     str_list[#str_list + 1] = ("%s%s = %s"):format(prefix, key_str, value_str)
   end
   return ("{\n%s\n%s}"):format(
-  concat(str_list, ",\n"), ("  "):format(indent - 1))
+  concat(str_list, ",\n"), ("  "):rep(indent))
 end
 
 
@@ -54,17 +55,48 @@ local function arr_to_str(tb, sep, _start, _end)
 end
 
 
--- 打印完整表格（支持多个参数）
-local print_table
-if unpack then
-  function print_table(...)
-    local params = pack(...)
-    for i = 1, params.n do
-      params[i] = tb_to_str(params[i], 2)
-    end
-    print(unpack(params, 1, params.n))
+-- 如果当前版本没有 table.pack
+if not pack then
+  local select = _G.select
+  function pack(...)
+    local tb = {...}
+    tb.n = _G.select('#', ...)
+    return tb
   end
+  _G.table.pack = pack
 end
+
+
+-- 如果当前版本没有 table.unpack
+if not unpack then
+  local load = _G.load or _G.loadstring
+  function unpack(tb, _start, _end)
+	
+	_start = _start or 1
+	_end = _end or #tb
+	
+    local sel = "tb[%d]"
+    local sels = {}
+    for i = _start, _end do
+      sels[i-_start+1] = sel:format(i)
+    end
+    
+    local unpacker = load("local tb = ...\nreturn " .. concat(sels, ','))
+    return unpacker(tb)
+  end
+  _G.table.unpack = unpack
+end
+
+
+-- 打印完整表格（支持多个参数）
+local function print_table(...)
+  local params = pack(...)
+  for i = 1, params.n do
+    params[i] = tb_to_str(params[i], 3)
+  end
+  print(unpack(params, 1, params.n))
+end
+
 
 
 -- 打印完整表格（支持指定深度）
@@ -97,14 +129,12 @@ end
 
 
 
-local err_msg = "bad argument #%s to '%s' (table expected, got %s)"
 
 local function TypeError(pos, got)
   local caller = debug.getinfo(2, "n")
-  local func_name = caller 
-  and caller.name or "func ?"
-  error(err_msg:format(
-  pos, func_name, got), 3)
+  local func_name = caller and caller.name or "func ?"
+  error(("bad argument #%s to '%s' (table expected, got %s)")
+  :format(pos, func_name, got), 3)
 end
 
 
@@ -127,20 +157,23 @@ end
 
 
 -- 获取表中最大正整数索引
-local function maxn(tb)
-  local t = type(tb)
-  if t ~= "table" then
-    TypeError(1, t)
-  end
+local maxn = _G.table.maxn
+if not maxn then
+  function maxn(tb)
+    local t = type(tb)
+    if t ~= "table" then
+      TypeError(1, t)
+    end
 
-  local max = 0
-  for index in next, tb do
-    max = type(index) == "number" 
-    and index > max
-    and index == int(index) 
-    and index or max
+    local max = 0
+    for index in next, tb do
+      max = type(index) == "number" 
+      and index > max
+      and index == int(index) 
+      and index or max
+    end
+    return max
   end
-  return max
 end
 
 
@@ -203,8 +236,8 @@ end
 
 
 
--- 分离table的非数组部分与数组部分
-local function detach(tb)
+-- 分离table的正整数部分，或自定义分离
+local function detach(tb, handler)
   local array = {}
   local hash = {}
   
