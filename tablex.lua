@@ -55,19 +55,18 @@ local function arr_to_str(tb, sep, _start, _end)
 end
 
 
--- 如果当前版本没有 table.pack
+-- 如果当前版本没有 pack
 if not pack then
   local select = _G.select
   function pack(...)
     local tb = {...}
-    tb.n = _G.select('#', ...)
+    tb.n = select('#', ...)
     return tb
   end
-  _G.table.pack = pack
 end
 
 
--- 如果当前版本没有 table.unpack
+-- 如果当前版本没有 unpack
 if not unpack then
   local load = _G.load or _G.loadstring
   function unpack(tb, _start, _end)
@@ -84,7 +83,6 @@ if not unpack then
     local unpacker = load("local tb = ...\nreturn " .. concat(sels, ','))
     return unpacker(tb)
   end
-  _G.table.unpack = unpack
 end
 
 
@@ -256,6 +254,8 @@ end
 
 
 local _M = {
+  pack = pack,
+  unpack = unpack,
   tostring = arr_to_str,
   dump = tb_to_str,
   print = table_print,
@@ -275,6 +275,8 @@ _M.__exports = {
     printt = print_table,
     dir = dir
   }, { _G.table,
+    pack = pack,
+    unpack = unpack,
     tostring = arr_to_str,
     dump = tb_to_str,
     print = table_print,
