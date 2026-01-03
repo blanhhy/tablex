@@ -1,20 +1,32 @@
 local _G = _G
 
-local print = _G.print
-local next = _G.next
-local pcall = _G.pcall
-
-local concat = _G.table.concat
-local pack = _G.table.pack
-local unpack = _G.table.unpack
-
-local str = _G.tostring
-local int = _G.math.floor
-
 local setmt = _G.setmetatable
 local getmt = _G.getmetatable
+local print = _G.print
 
+local next = _G.next
 local type = _G.type
+
+local str = _G.tostring
+local int = math.floor
+
+local outdated = tonumber(_G._VERSION:sub(5)) <= 5.1
+
+local concat = table.concat
+local pack, unpack
+
+if outdated then
+  local select = select
+  
+  function pack(...)
+    return {..., n = select('#', ...)}
+  end
+
+  unpack = _G.unpack or require "tablex.unpack"
+else
+  pack = table.pack
+  unpack = table.unpack
+end
 
 
 -- 列出完整表格
@@ -54,36 +66,6 @@ local function arr_to_str(tb, sep, _start, _end)
   or ("{ %s }"):format(concat(str_list, ", ", _start, _end))
 end
 
-
--- 如果当前版本没有 pack
-if not pack then
-  local select = _G.select
-  function pack(...)
-    local tb = {...}
-    tb.n = select('#', ...)
-    return tb
-  end
-end
-
-
--- 如果当前版本没有 unpack
-if not unpack then
-  local load = _G.load or _G.loadstring
-  function unpack(tb, _start, _end)
-	
-	_start = _start or 1
-	_end = _end or #tb
-	
-    local sel = "tb[%d]"
-    local sels = {}
-    for i = _start, _end do
-      sels[i-_start+1] = sel:format(i)
-    end
-    
-    local unpacker = load("local tb = ...\nreturn " .. concat(sels, ','))
-    return unpacker(tb)
-  end
-end
 
 
 -- 打印完整表格（支持多个参数）
@@ -129,7 +111,7 @@ end
 
 
 local function TypeError(pos, got)
-  local caller = debug.getinfo(2, "n")
+  local caller = debug and debug.getinfo(2, "n")
   local func_name = caller and caller.name or "func ?"
   error(("bad argument #%s to '%s' (table expected, got %s)")
   :format(pos, func_name, got), 3)
