@@ -1,25 +1,21 @@
-local _M = require "tablex.tablex"
+local M = require "tablex.tablex"
 local packagex = package.loaded.packagex
 
 if packagex and packagex.inited then
-  tablex = _M
-  __exports = _M.__exports
-
+  tablex    = M
+  __exports = M.__exports
   else
-    local env = _M.__exports[1][1]
-    for k, v in next, _M.__exports[1] do
-      if k ~= 1 then
-        env[k] = env[k] or v
-      end
-    end
-    
-    local env = _M.__exports[2][1]
-    for k, v in next, _M.__exports[2] do
-      if k ~= 1
-        and not _M.__exports[1][k] then
-        env[k] = env[k] or v
-      end
+    local extend = M.table.extend
+    local groups = M.__exports
+    M.__exports  = nil
+    M.__exported = true
+    local src, env
+    for i = 1, #groups do
+      src = groups[i]
+      env = src[1]
+      src[1] = nil
+      extend(env, src, true) -- avoid_covering = true
     end
 end
 
-return _M
+return M
