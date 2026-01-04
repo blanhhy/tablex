@@ -1,5 +1,5 @@
-package.path = "./?.lua;./?/init.lua;" .. package.path
+package.path = "../?.lua;../?/init.lua;" .. package.path
 
 local tablex = require "tablex"
 
-print(dir(tablex))
+print(tablex.dir(tablex))

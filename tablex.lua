@@ -21,72 +21,72 @@ end
 
 local Array, Table = {}, {}
 
--- 数组转字符串  
+-- 数组转字符串
 -- 对于表的递归, 也只会取数组部分
 function Array:tostring(sep, start, stop)
   if type(self) ~= "table" then
     return tostring(self)
   end
-  
+
   local str_list = {}
   local index = 1
   local value = self[1]
-  
+
   while value ~= nil do
-    str_list[index] = value == self 
+    str_list[index] = value == self
       and "self"
       or Array.tostring(value)
     index = index + 1
     value = self[index]
   end
-  
+
   sep   = sep or ", "
   start = start or 1
   stop  = stop or index - 1
-  
+
   return "{"..concat(str_list, sep, start, stop).."}"
 end
 
 Table._TOSTRING_DEPTH = 10 -- 默认的递归深度
 
--- 完整的 table 转字符串  
+-- 完整的 table 转字符串
 -- 内容可能很多, 需要限制递归深度
 function Table:tostring(max_depth, indent)
   max_depth = max_depth or Table._TOSTRING_DEPTH
   indent = indent or 0
 
   local typ = type(self)
-  
+
   if typ == "string" then
     return indent > 0 and ("%q"):format(self) or self
   end
-  
-  if typ ~= "table" 
+
+  if typ ~= "table"
   or indent >= max_depth then
     return tostring(self)
   end
-  
+
   local lines  = {}
   local prefix = ("  "):rep(indent)
   local key_str, val_str
-  
+
   for key, val in next, self do
 
     key_str = (
-      type(key) == "string" 
+      type(key) == "string"
       and "[%q]"
       or "[%s]"
     ):format(key)
 
     val_str = (val ~= _G) and (
       val ~= self and
-        Table.tostring(val, max_depth, indent + 1) 
+        Table.tostring(val, max_depth, indent + 1)
       or "self"
     ) or "_G" -- 排除_G与自引用，防止栈溢出
 
     lines[#lines+1] = ("%s  %s = %s"):format(prefix, key_str, val_str)
   end
-  
+
   return ("{\n%s\n%s}"):format(
     concat(lines, ",\n"),
     prefix
@@ -118,11 +118,11 @@ local function M_print(...)
   local nargs = select('#', ...)
   if nargs == 0 then return print("<no value>") end
   if nargs >= 2 then return Table.print(...) end
-  
+
   if type(...) ~= "table" then
     return print(tostring(...))
   end
-  
+
   local m = (nil ~= (...)[1] or not next(...)) and Array or Table
   return print(m.tostring(...))
 end
@@ -134,21 +134,21 @@ local dirs_MT = {
 -- 列出对象的所有字段
 function Table:dir()
   self = nil ~= self and (
-    type(self) == "table" 
-    and self 
+    type(self) == "table"
+    and self
     or getmetatable(self)
     or error(("The object (%s) has no accessible namespace.")
-      :format(tostring(tb)), 2)
+      :format(tostring(self)), 2)
   ) or _G
-  
+
   local dirs  = {}
   local index = 0
-  
+
   for key in next, self do
     index = index + 1
     dirs[index] = key
   end
-  
+
   dirs.n = index
   return setmetatable(dirs, dirs_MT)
 end
@@ -202,19 +202,19 @@ function Table:clone(no_MT, copyOf)
   if type(self) ~= "table" then
     return self -- 非 table 类型直接返回自身
   end
-  
+
   if copyOf and copyOf[self] then
     return copyOf[self] -- 处理循环引用
   end
-  
+
   local replica = {}
   copyOf = copyOf or {} -- 记录已复制的表，避免重复
   copyOf[self] = replica
-  
+
   for k, v in next, self do
     replica[k] = Table.clone(v, no_MT, copyOf) -- 递归复制
   end
-  
+
    -- 是否不设置元表? 默认会设置 (no_MT = nil)
   if no_MT then return replica end
   return setmetatable(replica, getmetatable(self))
@@ -224,9 +224,9 @@ end
 function Table:detach()
   local array = {}
   local table = {}
-  
+
   for k, v in next, self do
-    if type(k) == "number" 
+    if type(k) == "number"
       and k > 0
       and k == int(k) then
       array[k] = v
@@ -234,7 +234,7 @@ function Table:detach()
       table[k] = v
     end
   end
-  
+
   return table, array
 end
 
@@ -255,11 +255,11 @@ local M = {
   table = Table;
   array = Array;
   print = M_print;
-  
-  dir = Table.dir; -- 拿出来方便使用
-  maxn = maxn;     -- 全版本 maxn
-  pack  = pack;    -- 全版本 pack
-  unpack = unpack; -- 全版本 unpack
+
+  dir = Table.dir;   -- 拿出来方便使用
+  maxn = Table.maxn; -- 全版本 maxn
+  pack  = pack;      -- 全版本 pack
+  unpack = unpack;   -- 全版本 unpack
 }
 
 -- 导出组
