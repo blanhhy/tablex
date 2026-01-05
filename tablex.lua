@@ -251,6 +251,17 @@ function Array:extract()
   return array
 end
 
+-- 计算数组部分的实际长度
+function Array:length()
+  local index = 1
+  local value = self[1]
+  while value ~= nil do
+    index = index + 1
+    value = self[index]
+  end
+  return index - 1
+end
+
 local M = {
   table = Table;
   array = Array;

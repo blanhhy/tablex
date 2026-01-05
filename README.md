@@ -103,4 +103,7 @@ local tbl, arr = tablex.table.detach(tb)
 -- 提取 table 中的数组 (连续正整数键部分)
 local arr = tablex.array.extract(tb)
 
+-- 计算数组部分的实际长度
+local len = tablex.array.length(arr)
+
 ```
